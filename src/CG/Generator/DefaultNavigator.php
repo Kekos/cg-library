@@ -69,6 +69,15 @@ class DefaultNavigator
     {
         $visitor->startVisitingClass($class);
 
+        $traits = $class->getTraits();
+        if (!empty($traits)) {
+            $visitor->startVisitingTraits();
+            foreach ($traits as $trait => $aliases) {
+                $visitor->visitTrait($trait, $aliases);
+            }
+            $visitor->endVisitingTraits();
+        }
+
         $constants = $class->getConstants(true);
         if (!empty($constants)) {
             uksort($constants, $this->getConstantSortFunc());

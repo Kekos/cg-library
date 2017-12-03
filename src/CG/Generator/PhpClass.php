@@ -34,6 +34,7 @@ class PhpClass extends AbstractBuilder
     private $parentClassName;
     private $interfaceNames = array();
     private $useStatements = array();
+    private $traits = array();
     private $constants = array();
     private $properties = array();
     private $requiredFiles = array();
@@ -184,6 +185,83 @@ class PhpClass extends AbstractBuilder
         $this->useStatements[$alias] = $namespace;
 
         return $this;
+    }
+
+    /**
+     * @param array $traits
+     * @return $this
+     */
+    public function setTraits(array $traits)
+    {
+        foreach ($traits as $trait => $aliases) {
+            $this->addTrait($trait, $aliases);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $trait
+     * @param array $aliases
+     * @return $this
+     */
+    public function addTrait($trait, array $aliases = array())
+    {
+        $trait = ltrim($trait, '\\');
+
+        if (in_array($trait, $this->useStatements)) {
+            $parts = explode('\\', $trait);
+            $trait = end($parts);
+        }
+
+        $this->traits[$trait] = $aliases;
+
+        return $this;
+    }
+
+    /**
+     * @param string $trait
+     * @return $this
+     */
+    public function removeTrait($trait)
+    {
+        if (!array_key_exists($trait, $this->traits)) {
+            throw new \InvalidArgumentException(sprintf('The trait "%s" does not exist.', $trait));
+        }
+
+        unset($this->traits[$trait]);
+
+        return $this;
+    }
+
+    /**
+     * @param string $trait
+     * @return bool
+     */
+    public function hasTrait($trait)
+    {
+        return array_key_exists($trait, $this->traits);
+    }
+
+    /**
+     * @return array
+     */
+    public function getTraits()
+    {
+        return $this->traits;
+    }
+
+    /**
+     * @param string $trait
+     * @return array
+     */
+    public function getTrait($trait)
+    {
+        if ( ! isset($this->traits[$trait])) {
+            throw new \InvalidArgumentException(sprintf('The trait "%s" does not exist.'));
+        }
+
+        return $this->traits[$trait];
     }
 
     public function setConstants(array $constants)

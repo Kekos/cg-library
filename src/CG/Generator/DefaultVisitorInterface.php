@@ -40,6 +40,23 @@ interface DefaultVisitorInterface
     /**
      * @return void
      */
+    public function startVisitingTraits();
+
+    /**
+     * @param string $trait
+     * @param array $aliases
+     * @return void
+     */
+    public function visitTrait($trait, array $aliases);
+
+    /**
+     * @return void
+     */
+    public function endVisitingTraits();
+
+    /**
+     * @return void
+     */
     public function startVisitingClassConstants();
 
     /**

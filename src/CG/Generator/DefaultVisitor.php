@@ -116,6 +116,33 @@ class DefaultVisitor implements DefaultVisitorInterface
         ;
     }
 
+    public function startVisitingTraits()
+    {
+    }
+
+    public function visitTrait($trait, array $aliases)
+    {
+        if (empty($aliases)) {
+            $this->writer->writeln('use '.$trait.';');
+
+        } else {
+            $this->writer->writeln('use '.$trait.' {');
+            $this->writer->indent();
+
+            foreach ($aliases as $original => $alias) {
+                $this->writer->writeln($original.' as '.$alias.';');
+            }
+
+            $this->writer->outdent();
+            $this->writer->writeln('}');
+        }
+    }
+
+    public function endVisitingTraits()
+    {
+        $this->writer->write("\n");
+    }
+
     public function startVisitingClassConstants()
     {
     }
