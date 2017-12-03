@@ -69,7 +69,8 @@ class PhpMethod extends AbstractPhpMember
             $method->addParameter(static::createParameter($param));
         }
 
-        // FIXME: Extract body?
+        $method->setBody(static::getBodyFromReflection($ref));
+
         return $method;
     }
 
@@ -230,5 +231,50 @@ class PhpMethod extends AbstractPhpMember
     public function hasBuiltInReturnType()
     {
         return $this->returnTypeBuiltin;
+    }
+
+    /**
+     * https://github.com/schmittjoh/cg-library/pull/19/files
+     *
+     * @param \ReflectionMethod $ref
+     * @return string
+     */
+    public static function getBodyFromReflection(\ReflectionMethod $ref)
+    {
+        $startLine = $ref->getStartLine();
+        $endLine = $ref->getEndLine();
+        $file = $ref->getFileName();
+
+        if (empty($file)) {
+            return '';
+        }
+
+        $content = @file_get_contents($file);
+        if (empty($content)) {
+            return '';
+        }
+
+        $lineArray = explode("\n", $content);
+        $body = '';
+
+        for ($i = $startLine; $i <= $endLine; $i++) {
+            $body .= $lineArray[$i - 1] . "\n";
+        }
+
+        $leftBracePos = strpos($body, '{');
+        if ($leftBracePos === false) {
+            return '';
+        }
+
+        $body = substr($body, $leftBracePos + 1);
+        $rightBracePos = strrpos($body, '}');
+        if ($rightBracePos === false) {
+            return '';
+        }
+
+        $body = substr($body, 0, $rightBracePos);
+        $body = trim($body);
+
+        return $body;
     }
 }
